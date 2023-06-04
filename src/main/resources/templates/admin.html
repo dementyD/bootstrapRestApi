@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <title>Admin panel</title>
+</head>
+<body>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+<div class="container-fluid bg-dark">
+    <div class="row">
+        <div class="col-md">
+            <p id="headerInfo" class="text-white text-inline "></p>
+        </div>
+        <div class="col-md-1 align-self-center">
+            <a class="text-secondary" href="logout">Logout</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    $.ajax({
+        method: 'GET',
+        url: "/getUserSession",
+        async: false,
+        success: function (response) {
+            let strRoles = '';
+            for (let i = 0; i < response.roles.length; i++) {
+                strRoles += response.roles[i].role + " ";
+            }
+
+            let str =
+                "<b>" + response.email + "</b>" +
+                " with roles: " +
+                strRoles;
+
+            $("#headerInfo").append(str)
+
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    })
+</script>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 bg-white">
+            <div class="nav flex-column nav-fill nav-pills " id="v-pills-tab" role="tablist"
+                 aria-orientation="vertical">
+                <a class="nav-link active" id="v-pills-home-tab" data-toggle="pill" href="#adminPage"
+                   role="tab"
+                   aria-controls="v-pills-home" aria-selected="true">Admin</a>
+                <a class="nav-link" id="v-pills-profile-tab" data-toggle="pill" href="#userPage"
+                   role="tab"
+                   aria-controls="v-pills-profile" aria-selected="false">User</a>
+            </div>
+        </div>
+
+        <div class="tab-content col-md bg-light" id="v-pills-tabContent">
+
+            <div id="adminPage" class="tab-pane fade show active "><h2>Admin panel</h2>
+                <ul class="nav nav-tabs">
+                    <li class="nav-item "><a data-toggle="pill" class="nav-link active" href="#table">Users
+                        Table</a>
+                    </li>
+                    <li class="nav-item"><a data-toggle="pill" class="nav-link" href="#new">New User</a></li>
+                </ul>
+
+                <div class="tab-content">
+
+                    <div class="tab-pane active border" id="table">
+                        <caption><h5>All user</h5></caption>
+                        <div class="table-responsive bg-white">
+
+                            <table class="table table-striped" style="background-color: #fff">
+                                <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">First Name</th>
+                                    <th scope="col">Last Name</th>
+                                    <th scope="col">Age</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Role</th>
+                                    <th scope="col">Edit</th>
+                                    <th scope="col">Delete</th>
+                                </tr>
+                                </thead>
+                                <tbody id="allUser">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <script>
+
+                        $.ajax({
+                            method: 'GET',
+                            url: "/adminGetAll",
+                            async: false,
+                            success: function (response) {
+                                for (let i = 0; i < response.length; i++) {
+
+                                    let strRoles = '';
+                                    for (let j = 0; j < response[i].roles.length; j++) {
+                                        strRoles += response[i].roles[j].role + " ";
+                                    }
+
+                                    let str =
+                                        "<tr>" +
+                                        "<td>" + response[i].id + "</td>" +
+                                        "<td>" + response[i].username + "</td>" +
+                                        "<td>" + response[i].lastname + "</td>" +
+                                        "<td>" + response[i].age + "</td>" +
+                                        "<td>" + response[i].email + "</td>" +
+                                        "<td>" + strRoles + "</td>" +
+                                        "<td>" + "<button class=\"btn btn-info\" data-toggle=\"modal\" data-target=\"#edit\"  onclick='send(" + response[i].id + ")'>Edit</button>" + "</td>" +
+                                        "<td>" + "<button class=\"btn btn-danger\" data-toggle=\"modal\" data-target=\"#delete\" onclick='send(" + response[i].id + ")'>Delete</button>" + "</td>" +
+                                        "</tr>";
+
+                                    $("#allUser").append(str)
+
+                                }
+
+                            },
+                            error: function (error) {
+                                console.log(error);
+                            }
+                        })
+                    </script>
+
+
+                    <div class="modal fade" id="edit">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit user</h5>
+                                    <button class="close" data-dismiss="modal">x</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row justify-content-center">
+                                        <div class="col-7">
+                                            <form method="post" action="#" autocomplete="off">
+
+                                                <div class="form-group text-center">
+                                                    <label for="idEdit"><b>ID</b></label>
+                                                    <input id="idEdit" name="idEdit" type="text"
+                                                           class="form-control form-control-sm"
+                                                           readonly>
+                                                </div>
+
+                                                <div class="form-group text-center">
+                                                    <label for="firstnameEdit"><b>First name</b></label>
+                                                    <input name="firstname" type="text"
+                                                           class="form-control form-control-sm"
+                                                           id="firstnameEdit">
+                                                </div>
+
+                                                <div class="form-group text-center">
+                                                    <label for="lastnameEdit"><b>Last name</b></label>
+                                                    <input name="lastname" type="text"
+                                                           class="form-control form-control-sm"
+                                                           id="lastnameEdit">
+
+                                                </div>
+                                                <div class="form-group text-center">
+                                                    <label for="ageEdit"><b>Age</b></label>
+                                                    <input name="age" type="number"
+                                                           class="form-control form-control-sm"
+                                                           id="ageEdit">
+                                                </div>
+
+                                                <div class="form-group text-center">
+                                                    <label for="emailEdit"><b>Email</b></label>
+                                                    <input name="email" type="email"
+                                                           class="form-control form-control-sm"
+                                                           id="emailEdit">
+
+                                                </div>
+                                                <div class="form-group text-center">
+                                                    <label for="passwordEdit"><b>Password</b></label>
+                                                    <input name="password" type="password"
+                                                           class="form-control form-control-sm"
+                                                           id="passwordEdit">
+
+                                                </div>
+                                                <div class="form-group text-center">
+                                                    <label for="roleEdit"><b>Role</b></label>
+                                                    <select id="roleEdit" class="custom-select" size="2">
+                                                        <option value="ROLE_ADMIN">ADMIN</option>
+                                                        <option value="ROLE_USER">USER</option>
+                                                    </select>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button data-dismiss="modal" class="btn btn-secondary">Close</button>
+                                    <button id="editBtn" type="submit" data-dismiss="modal" class="btn btn-primary">
+                                        Edit
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <script>
+                        function send(value) {
+                            $.ajax({
+                                method: "GET",
+                                url: "/admin/" + value,
+                                async: false,
+
+                                success: function (response) {
+                                    $("#idEdit").val(response.id)
+                                    $("#firstnameEdit").val(response.username)
+                                    $("#lastnameEdit").val(response.lastname)
+                                    $("#ageEdit").val(response.age)
+                                    $("#emailEdit").val(response.email)
+
+                                    $("#idDelete").val(response.id)
+                                    $("#firstnameDelete").val(response.username)
+                                    $("#lastnameDelete").val(response.lastname)
+                                    $("#ageDelete").val(response.age)
+                                    $("#emailDelete").val(response.email)
+
+                                }
+                            })
+                        }
+                    </script>
+
+                    <script>
+                        $(document).ready(function () {
+                            $('#editBtn').click(function () {
+
+                                let user = {
+                                    id: $('#idEdit').val(),
+                                    username: $('#firstnameEdit').val(),
+                                    lastname: $('#lastnameEdit').val(),
+                                    age: $('#ageEdit').val(),
+                                    email: $('#emailEdit').val(),
+                                    password: $('#passwordEdit').val(),
+                                    roles: [$('#roleEdit').val()],
+                                }
+                                $.ajax({
+                                    method: "PUT",
+                                    url: "admin/edit",
+                                    async: false,
+                                    contentType: "application/json",
+                                    data: JSON.stringify(user),
+                                    success: () => {
+                                        location.reload()
+                                    },
+                                    error: function (error) {
+                                        console.log(error);
+                                    }
+                                })
+                            })
+                        })
+                    </script>
+
+                    <script>
+
+                        $(document).ready(function () {
+                            $("#deleteBtn").click(function () {
+
+                                let user = {
+                                    id: $('#idDelete').val(),
+                                }
+
+                                $.ajax({
+                                    method: "DELETE",
+                                    url: "admin/delete",
+                                    async: false,
+                                    contentType: "application/json",
+                                    data: JSON.stringify(user),
+                                    success: () => {
+                                        location.reload()
+                                    },
+                                    error: function (error) {
+                                        console.log(error)
+                                    }
+                                })
+                            })
+                        })
+
+                    </script>
+
+                    <div class="modal fade" id="delete">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Delete user</h5>
+                                    <button class="close" data-dismiss="modal">x</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row justify-content-center">
+                                        <div class="col-7">
+                                            <form method="post" autocomplete="off">
+
+                                                <div class="form-group text-center">
+                                                    <label for="idDelete"><b>ID</b></label>
+                                                    <input name="password" type="text"
+                                                           class="form-control form-control-sm"
+                                                           id="idDelete" readonly>
+                                                </div>
+
+                                                <div class="form-group text-center">
+                                                    <label for="firstnameDelete"><b>First name</b></label>
+                                                    <input name="firstname" type="text"
+                                                           class="form-control form-control-sm"
+                                                           id="firstnameDelete" readonly>
+
+                                                </div>
+                                                <div class="form-group text-center">
+                                                    <label for="lastnameDelete"><b>Last name</b></label>
+                                                    <input name="lastname" type="text"
+                                                           class="form-control form-control-sm"
+                                                           id="lastnameDelete" readonly>
+
+                                                </div>
+                                                <div class="form-group text-center">
+                                                    <label for="ageDelete"><b>Age</b></label>
+                                                    <input name="age" type="text"
+                                                           class="form-control form-control-sm"
+                                                           id="ageDelete" readonly>
+
+                                                </div>
+                                                <div class="form-group text-center">
+                                                    <label for="emailDelete"><b>Email</b></label>
+                                                    <input name="email" type="email"
+                                                           class="form-control form-control-sm"
+                                                           id="emailDelete" readonly>
+
+                                                </div>
+
+                                                <div class="form-group text-center">
+                                                    <label for="roleDelete"><b>Role</b></label>
+                                                    <select id="roleDelete" class="custom-select" size="2" disabled>
+                                                        <option value="1">ADMIN</option>
+                                                        <option value="2">USER</option>
+                                                    </select>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button data-dismiss="modal" class="btn btn-secondary">Close</button>
+                                    <button id="deleteBtn" type="submit" data-dismiss="modal"
+                                            class="btn btn-danger">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="new">
+                        <h5>Add new user</h5>
+
+                        <div class="container-fluid bg-white">
+                            <div class="row justify-content-center">
+                                <div class="col-5">
+
+                                    <form class="col-9" id="formNew" autocomplete="off">
+                                        <div class="form-group text-center">
+                                            <label for="firstname"><b>First name</b></label>
+                                            <input name="firstname" type="text" class="form-control form-control-sm"
+                                                   id="firstname">
+
+                                        </div>
+                                        <div class="form-group text-center">
+                                            <label for="lastname"><b>Last name</b></label>
+                                            <input name="lastname" type="text" class="form-control form-control-sm"
+                                                   id="lastname">
+
+                                        </div>
+                                        <div class="form-group text-center">
+                                            <label for="age"><b>Age</b></label>
+                                            <input name="age" type="text" class="form-control form-control-sm"
+                                                   id="age">
+
+                                        </div>
+                                        <div class="form-group text-center">
+                                            <label for="email"><b>Email</b></label>
+                                            <input name="email" type="email" class="form-control form-control-sm"
+                                                   id="email">
+
+                                        </div>
+                                        <div class="form-group text-center">
+                                            <label for="password"><b>Password</b></label>
+                                            <input name="password" type="password"
+                                                   class="form-control form-control-sm"
+                                                   id="password">
+
+                                        </div>
+                                        <div class="form-group text-center">
+                                            <label for="myselect"><b>Role</b></label>
+                                            <select id="myselect" class="custom-select" size="2">
+                                                <option value="ROLE_ADMIN">ADMIN</option>
+                                                <option value="ROLE_USER">USER</option>
+                                            </select>
+
+                                        </div>
+                                        <div class="form-group text-center">
+                                            <button type="submit" class="btn btn-success">Add new
+                                                user
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    <script>
+                                        $(document).ready(function () {
+                                            $('#formNew').on('submit', function (event) {
+                                                event.preventDefault();
+
+                                                let user = {
+                                                    username: $('#firstname').val(),
+                                                    lastname: $('#lastname').val(),
+                                                    age: $('#age').val(),
+                                                    email: $('#email').val(),
+                                                    password: $('#password').val(),
+                                                    roles: [$('#myselect').val()],
+                                                }
+                                                $.ajax({
+                                                    method: 'POST',
+                                                    url: "/admin",
+                                                    async: false,
+                                                    contentType: "application/json",
+                                                    data: JSON.stringify(user),
+                                                    success: () => {
+                                                        location.reload()
+                                                    },
+                                                    error: function (error) {
+                                                        console.log(error);
+                                                    }
+                                                });
+                                            });
+                                        });
+
+                                    </script>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade col-md bg-light" id="userPage"><h2>User information-page</h2>
+
+                <div class="tab-pane active border " id="table ">
+                    <caption><h5>About user</h5></caption>
+                    <div class="table-responsive bg-white">
+
+                        <table class="table table-striped" style="background-color: #fff">
+                            <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">First Name</th>
+                                <th scope="col">Last Name</th>
+                                <th scope="col">Age</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Role</th>
+                            </tr>
+                            </thead>
+                            <tbody id="allUsers">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                $.ajax({
+                    method: 'GET',
+                    url: "/getUser",
+                    async: false,
+                    success: function (response) {
+                        let strRoles = '';
+                        for (let i = 0; i < response.roles.length; i++) {
+                            strRoles += response.roles[i].role + " ";
+                        }
+                        let str =
+                            "<tr>" +
+                            "<td>" + response.id + "</td>" +
+                            "<td>" + response.username + "</td>" +
+                            "<td>" + response.lastname + "</td>" +
+                            "<td>" + response.age + "</td>" +
+                            "<td>" + response.email + "</td>" +
+                            "<td>" + strRoles + "</td>" +
+                            "</tr>";
+
+                        $("#allUsers").append(str)
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                })
+            </script>
+
+        </div>
+    </div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
